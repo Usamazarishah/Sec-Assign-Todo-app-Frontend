@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
+import toast from 'react-hot-toast';
+
 
 function App() {
   const BASE_URL = "https://sec-assign-todo-app-backend.vercel.app";
@@ -28,29 +30,34 @@ function App() {
 
       await axios.post(`${BASE_URL}/api/v1/todo`, {
         todo: todoValue,
-      })
+      });
 
       getTodo();
     } catch (error) {
       data?.message;
     }
-    event.target.reset()
+    event.target.reset();
   };
 
-  //todo delete function
-  // const deleteTodo = async (id) => {
-  //   const res = await axios.delete(`${BASE_URL}/api/v1/todo/${id}`)
-    
-  // }
+  // todo delete function
+  const deleteTodo = async (id) => {
+    try {
+      const {data} = await axios.delete(`${BASE_URL}/api/v1/todo/${id}`);
+      console.log('delete todo', data);
+      getTodo();
+      toast.success(data?.message)
 
-  // onClick={()=>deleteTodo(todo?.id)} 
-
+    } catch (error) {
+      toast.error(error?.res?.data?.message || "unknown error")
+    };
+  }
 
   return (
+  
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">Todo App</h1>
-
+ 
         <form onSubmit={addTodo} className="flex mb-4">
           <input
             type="text"
@@ -61,17 +68,23 @@ function App() {
             Add
           </button>
         </form>
+        
+        {!todos.length && <span className="text-center flex justify-center text-gray-700">Todos is empty</span>}
 
         <ul className="divide-y divide-gray-200">
-          {todos?.map((todo,id) => {
+          {todos?.map((todo) => {
             return (
-              <li key={todo?.id} className="flex items-center justify-between py-2">
+              <li
+                key={todo?.id}
+                className="flex items-center justify-between py-2"
+              >
                 <span className="text-gray-700">{todo?.todoContent}</span>
                 <div className="flex items-center space-x-2">
                   <button className="text-green-500 hover:text-green-600">
                     Edit
                   </button>
-                  <button className="text-red-500 hover:text-red-600">
+                  
+                  <button onClick={() => deleteTodo(todo?.id)} className="text-red-500 hover:text-red-600">
                     Delete
                   </button>
                 </div>
